@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intervo</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="page">
+    <nav>
+      <div class="logo">inter<span>vo</span></div>
+      <span class="nav-tag">AI Interview Agent</span>
+    </nav>
+
+    <div id="keyScreen" class="upload-container" style="display: none;">
+      <div class="upload-header">
+        <h1>Welcome to<br /><em>Intervo.</em></h1>
+        <p>Enter your Sarvam API key to get started.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; max-width: 480px;">
+        <input type="password" id="apiKeyInput" placeholder="sk_..." />
+        <div class="upload-error" id="keyError"></div>
+        <button class="btn-primary" id="saveKeyBtn" style="width: 100%;">Continue</button>
+        <a href="https://dashboard.sarvam.ai" target="_blank" style="font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace;">
+          Get your API key at dashboard.sarvam.ai
+        </a>
+      </div>
+    </div>
+
+    <div id="uploadScreen" class="upload-container" style="display: none;">
+      <div class="upload-header">
+        <h1>Your next interview,<br /><em>practiced.</em></h1>
+        <p>Upload your resume and job description to begin.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 24px; width: 100%; max-width: 760px;">
+        <div class="upload-grid">
+          <div class="drop-zone" id="resumeZone">
+            <input type="file" id="resumeInput" accept=".pdf" />
+            <div class="drop-icon">R</div>
+            <div class="drop-label">Resume</div>
+            <div class="drop-sub">PDF only</div>
+            <div class="file-name" id="resumeName"></div>
+          </div>
+
+          <div class="drop-zone" id="jdZone">
+            <input type="file" id="jdInput" accept=".pdf" />
+            <div class="drop-icon">JD</div>
+            <div class="drop-label">Job Description</div>
+            <div class="drop-sub">PDF only</div>
+            <div class="file-name" id="jdName"></div>
+          </div>
+        </div>
+
+        <div class="upload-error" id="uploadError"></div>
+        <button class="btn-primary" id="startBtn" disabled>Start Interview</button>
+
+        <button id="changeKeyBtn" style="background: transparent; border: none; color: var(--text-muted); font-size: 12px; font-family: 'DM Mono', monospace; cursor: pointer;">
+          Change API key
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const keyScreen = document.getElementById('keyScreen');
+    const uploadScreen = document.getElementById('uploadScreen');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const saveKeyBtn = document.getElementById('saveKeyBtn');
+    const keyError = document.getElementById('keyError');
+    const resumeInput = document.getElementById('resumeInput');
+    const jdInput = document.getElementById('jdInput');
+    const resumeZone = document.getElementById('resumeZone');
+    const jdZone = document.getElementById('jdZone');
+    const resumeName = document.getElementById('resumeName');
+    const jdName = document.getElementById('jdName');
+    const startBtn = document.getElementById('startBtn');
+    const uploadError = document.getElementById('uploadError');
+    const changeKeyBtn = document.getElementById('changeKeyBtn');
+
+    function showUpload() {
+      keyScreen.style.display = 'none';
+      uploadScreen.style.display = 'flex';
+    }
+
+    function showKeyScreen() {
+      uploadScreen.style.display = 'none';
+      keyScreen.style.display = 'flex';
+    }
+
+    const savedKey = localStorage.getItem('sarvam_api_key');
+    if (savedKey) {
+      showUpload();
+    } else {
+      showKeyScreen();
+    }
+
+    saveKeyBtn.addEventListener('click', () => {
+      const key = apiKeyInput.value.trim();
+      if (!key || !key.startsWith('sk_')) {
+        keyError.textContent = 'Please enter a valid Sarvam API key starting with sk_';
+        return;
+      }
+      localStorage.setItem('sarvam_api_key', key);
+      keyError.textContent = '';
+      showUpload();
+    });
+
+    apiKeyInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') saveKeyBtn.click();
+    });
+
+    changeKeyBtn.addEventListener('click', () => {
+      localStorage.removeItem('sarvam_api_key');
+      apiKeyInput.value = '';
+      showKeyScreen();
+    });
+
+    function checkReady() {
+      startBtn.disabled = !(resumeInput.files[0] && jdInput.files[0]);
+    }
+
+    resumeInput.addEventListener('change', () => {
+      if (resumeInput.files[0]) {
+        resumeName.textContent = resumeInput.files[0].name;
+        resumeZone.classList.add('uploaded');
+      }
+      checkReady();
+    });
+
+    jdInput.addEventListener('change', () => {
+      if (jdInput.files[0]) {
+        jdName.textContent = jdInput.files[0].name;
+        jdZone.classList.add('uploaded');
+      }
+      checkReady();
+    });
+
+    startBtn.addEventListener('click', async () => {
+      uploadError.textContent = '';
+      startBtn.disabled = true;
+      startBtn.textContent = 'Preparing...';
+
+      const apiKey = localStorage.getItem('sarvam_api_key');
+      const form = new FormData();
+      form.append('resume', resumeInput.files[0]);
+      form.append('jd', jdInput.files[0]);
+
+      try {
+        const res = await fetch('/api/start', {
+          method: 'POST',
+          headers: { 'X-Sarvam-Key': apiKey },
+          body: form,
+        });
+        if (!res.ok) throw new Error('Failed to start session');
+        const data = await res.json();
+        window.location.href = '/interview?session_id=' + data.session_id + '&opening_text=' + encodeURIComponent(data.text);
+      } catch (e) {
+        uploadError.textContent = 'Something went wrong. Please try again.';
+        startBtn.disabled = false;
+        startBtn.textContent = 'Start Interview';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intervo - Interview</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="page">
+    <nav>
+      <div class="logo">inter<span>vo</span></div>
+      <div class="status-bar">
+        <div class="status-dot active" id="statusDot"></div>
+        <span id="statusText">Initializing</span>
+      </div>
+    </nav>
+
+    <div class="interview-container">
+      <div class="orb-wrapper">
+        <div class="orb-ring"></div>
+        <div class="orb-ring"></div>
+        <div class="orb-ring"></div>
+        <div class="orb idle" id="orb"></div>
+      </div>
+
+      <div class="transcript-box" id="transcriptBox">
+        <div class="transcript-empty" id="transcriptEmpty">Waiting for interviewer...</div>
+      </div>
+
+      <div class="mic-hint" id="micHint">Hold spacebar or tap orb to speak</div>
+
+      <button class="end-btn" id="endBtn">End Interview</button>
+    </div>
+  </div>
+
+  <script src="/static/app.js?v=3"></script>
+</body>
+</html>

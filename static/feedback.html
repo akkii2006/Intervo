@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intervo - Feedback</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="page">
+    <nav>
+      <div class="logo">inter<span>vo</span></div>
+      <span class="nav-tag">Interview Complete</span>
+    </nav>
+
+    <div id="loadingScreen" class="loading-screen">
+      <div class="spinner"></div>
+      <div class="loading-text">Evaluating your interview...</div>
+    </div>
+
+    <div id="feedbackContent" class="feedback-container" style="display: none;">
+      <div class="feedback-header">
+        <h1 id="verdictTitle">...</h1>
+        <div class="verdict-badge" id="verdictBadge">Evaluating</div>
+      </div>
+
+      <div class="hire-meter">
+        <div class="meter-label">
+          <span>Hire Likelihood</span>
+          <span class="meter-value" id="hireValue">0%</span>
+        </div>
+        <div class="meter-track">
+          <div class="meter-fill" id="meterFill"></div>
+        </div>
+      </div>
+
+      <div class="scores-grid">
+        <div class="score-card">
+          <div class="score-card-label">Technical</div>
+          <div class="score-card-value" id="techScore">-</div>
+        </div>
+        <div class="score-card">
+          <div class="score-card-label">Communication</div>
+          <div class="score-card-value" id="commScore">-</div>
+        </div>
+        <div class="score-card">
+          <div class="score-card-label">Confidence</div>
+          <div class="score-card-value" id="confScore">-</div>
+        </div>
+      </div>
+
+      <div class="feedback-sections">
+        <div class="feedback-section full-width">
+          <div class="section-title">Summary</div>
+          <div class="summary-text" id="summaryText"></div>
+        </div>
+
+        <div class="feedback-section">
+          <div class="section-title">Strengths</div>
+          <ul class="feedback-list" id="strengthsList"></ul>
+        </div>
+
+        <div class="feedback-section">
+          <div class="section-title">Areas to Improve</div>
+          <ul class="feedback-list weak" id="weaknessesList"></ul>
+        </div>
+
+        <div class="feedback-section full-width">
+          <div class="section-title">Recommendations</div>
+          <ul class="feedback-list improve" id="improvementsList"></ul>
+        </div>
+      </div>
+
+      <button class="restart-btn" onclick="localStorage.removeItem('intervo_session'); window.location.href='/'">Start New Interview</button>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id') || localStorage.getItem('intervo_session');
+    const apiKey = localStorage.getItem('sarvam_api_key') || '';
+
+    if (!sessionId) window.location.href = '/';
+
+    async function loadFeedback() {
+      const form = new FormData();
+      form.append('session_id', sessionId);
+
+      try {
+        const res = await fetch('/api/evaluate', {
+          method: 'POST',
+          headers: { 'X-Sarvam-Key': apiKey },
+          body: form,
+        });
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        renderFeedback(data);
+      } catch (e) {
+        document.getElementById('loadingScreen').innerHTML =
+          '<div class="loading-text">Failed to load feedback. Please try again.</div>';
+      }
+    }
+
+    function renderFeedback(data) {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('feedbackContent').style.display = 'flex';
+
+      document.getElementById('verdictTitle').textContent = data.verdict;
+      document.getElementById('verdictBadge').textContent = data.verdict;
+
+      const hire = data.hire_likelihood;
+      document.getElementById('hireValue').textContent = hire + '%';
+
+      setTimeout(() => {
+        document.getElementById('meterFill').style.width = hire + '%';
+      }, 100);
+
+      document.getElementById('techScore').textContent = data.technical_score;
+      document.getElementById('commScore').textContent = data.communication_score;
+      document.getElementById('confScore').textContent = data.confidence_score;
+
+      document.getElementById('summaryText').textContent = data.summary;
+
+      const strengthsList = document.getElementById('strengthsList');
+      data.strengths.forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        strengthsList.appendChild(li);
+      });
+
+      const weaknessesList = document.getElementById('weaknessesList');
+      data.weaknesses.forEach(w => {
+        const li = document.createElement('li');
+        li.textContent = w;
+        weaknessesList.appendChild(li);
+      });
+
+      const improvementsList = document.getElementById('improvementsList');
+      data.improvements.forEach(i => {
+        const li = document.createElement('li');
+        li.textContent = i;
+        improvementsList.appendChild(li);
+      });
+    }
+
+    loadFeedback();
+  </script>
+</body>
+</html>

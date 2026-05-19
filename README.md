@@ -103,6 +103,3 @@ Any language supported by Sarvam's speech stack, including English, Hindi, Tamil
 
 ![Screenshot 4](img4.png)
 
-## License
-
-MIT

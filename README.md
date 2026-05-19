@@ -2,6 +2,10 @@
 
 An AI-powered voice interview agent built with Sarvam's speech and language stack. Upload a resume and job description, conduct a full voice interview, and receive detailed feedback on your performance.
 
+## Live Demo
+
+https://intervo-ak1h.onrender.com
+
 ## How It Works
 
 1. Enter your Sarvam API key
@@ -12,12 +16,12 @@ An AI-powered voice interview agent built with Sarvam's speech and language stac
 
 ## Tech Stack
 
-- **Backend** -- FastAPI (Python)
-- **Frontend** -- HTML, CSS, vanilla JavaScript
-- **Speech to Text** -- Sarvam Saaras V3
-- **Text to Speech** -- Sarvam Bulbul V3
-- **Language Model** -- Sarvam 30B
-- **PDF Parsing** -- PyMuPDF
+- **Backend** - FastAPI (Python)
+- **Frontend** - HTML, CSS, vanilla JavaScript
+- **Speech to Text** - Sarvam Saaras V3
+- **Text to Speech** - Sarvam Bulbul V3
+- **Language Model** - Sarvam 30B
+- **PDF Parsing** - PyMuPDF
 
 ## Prerequisites
 
@@ -29,7 +33,7 @@ An AI-powered voice interview agent built with Sarvam's speech and language stac
 Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/intervo.git
+git clone https://github.com/akkii2006/Intervo.git
 cd intervo
 ```
 
@@ -88,3 +92,17 @@ Any language supported by Sarvam's speech stack, including English, Hindi, Tamil
 - Audio recordings are capped at 30 seconds per response due to Sarvam API limits.
 - The AI decides when to end the interview, typically after 6 to 10 questions.
 - The starter plan on Sarvam has a 4096 token limit per request.
+
+## Screenshots
+
+![Screenshot 1](img1.png)
+
+![Screenshot 2](img2.png)
+
+![Screenshot 3](img3.png)
+
+![Screenshot 4](img4.png)
+
+## License
+
+MIT
